@@ -63,7 +63,6 @@ def save(e=None):
 
     if rect_id is not None:
         c = canvas.coords(rect_id)
-        print(c)
         cords_dict = {
                 "x1":c[0],
                 "y1":c[1],
@@ -91,7 +90,6 @@ def save(e=None):
         messagebox.showerror("No Rectangle!","No rectangle has been drawn on the image. Kindly draw a rectangle and then click SAVE.")
         
 def mouse_press(event):
-    print("HI")
     global start_x, start_y, rect_id
     if switch_var.get() == "On":
         global color
@@ -99,7 +97,6 @@ def mouse_press(event):
         rect_id = canvas.create_rectangle(start_x,start_y,start_x,start_y,outline=color.lower(),width=2)
 
 def mouse_drag(event):
-    print("YO")
     global rect_id
     if switch_var.get() == "On":
         canvas.coords(rect_id,start_x,start_y,event.x,event.y)
