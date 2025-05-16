@@ -6,7 +6,7 @@ import io,os,random
 
 root = Tk()
 root.title("Image Editor")
-root.geometry("500x700")
+root.geometry(f"500x700+500+50")
 root.iconbitmap("icon.ico")
 
 global current,i_path,o_path,images,statusBar,canvas,color
@@ -119,8 +119,9 @@ def io_folder_sel(io_selec):
     global i_path,o_path,inputLabel,outputLabel,top
 
     path = filedialog.askdirectory()
+    
     if path: 
-        msg = "Folder Selected"
+        msg = f"Folder ({path.split('/')[-1]}) Selected"
 
         if io_selec == "i": 
             i_path = path
@@ -139,10 +140,10 @@ def io_folder_sel(io_selec):
     except: pass
 
 def open_new_window():
-    global inputLabel,outputLabel,top
+    global inputLabel,outputLabel,top,x,y
     top = Toplevel(root) 
     top.title("Input Output Folder Choice")
-    top.geometry("250x150")  
+    top.geometry(f"250x150+550+300")  
 
     inputLabel = Label(top,text="Select Input Folder")
     inputLabel.grid(row=1,column=0,pady=(25,10),padx=15)
@@ -201,20 +202,23 @@ def random_clr():
 statusBar = Label(root)
 canvas = Canvas(root)
 
-saveBtn = Button(root,text="Save",fg="red",command=save,font=("Calibri",15))
-saveBtn.grid(row=1,column=1)
+cmd_frame = Frame(root)
+cmd_frame.grid(row=1,column=0,columnspan=3)
 
-forwardBtn = Button(root,text=">>",fg="blue",command=forward,font=("Calibri",25))
-forwardBtn.grid(row=1,column=2)
+saveBtn = Button(cmd_frame,text="Save",fg="red",command=save,font=("Calibri",15))
+saveBtn.grid(row=0,column=1,padx=40)
 
-backwardsBtn = Button(root,text="<<",fg="blue",command=backward,state=DISABLED,font=("Calibri",25))
-backwardsBtn.grid(row=1,column=0)
+forwardBtn = Button(cmd_frame,text=">>",fg="blue",command=forward,font=("Calibri",25))
+forwardBtn.grid(row=0,column=2)
 
-clearBtn = Button(root,text="Clear Canvas",command=clear,font=("Calibri",15))
-clearBtn.grid(row=3,column=0)
+backwardsBtn = Button(cmd_frame,text="<<",fg="blue",command=backward,state=DISABLED,font=("Calibri",25))
+backwardsBtn.grid(row=0,column=0)
+
+clearBtn = Button(root,text="Clear Canvas",command=clear)
+clearBtn.grid(row=3,column=0,padx=(20,5))
 
 switch_frame = LabelFrame(root,text="Rectangle Tool")
-switch_frame.grid(row=3,column=2,padx=(0,15),pady=(10,20),columnspan=2)
+switch_frame.grid(row=3,column=1,padx=(10,15),pady=(10,20))
 
 switch_var = StringVar(value="On")
 switch = OptionMenu(switch_frame,switch_var,*["On","Off"],command=switch_cmd)
