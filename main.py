@@ -87,24 +87,32 @@ def save(e=None):
     scale_x = img_w / canvas_w
     scale_y = img_h / canvas_h
 
-    field_names = ["x1", "y1", "x2", "y2", "color", "file"]
+    color_label_map = {v: k for k, v in label_dict.items()}
 
-    for rect_id in rectangles:
-        rect, clr = rect_id[0], rect_id[1]
-        c = canvas.coords(rect)
+    yolo_filename = os.path.join(o_path, f"image{current+1}.txt")
+    with open(yolo_filename, "w") as yolo_file:
+        for rect_id in rectangles:
+            rect, clr = rect_id[0], rect_id[1]
+            c = canvas.coords(rect)
 
-        cords_dict = {
-            "x1": round(c[0] * scale_x, 2),
-            "y1": round(c[1] * scale_y, 2),
-            "x2": round(c[2] * scale_x, 2),
-            "y2": round(c[3] * scale_y, 2),
-            "color": clr,
-            "file": f"image{current+1}.png"
-        }
+            x1 = c[0] * scale_x
+            y1 = c[1] * scale_y
+            x2 = c[2] * scale_x
+            y2 = c[3] * scale_y
 
-        with open(f"{o_path}\\data.csv", "a", newline="\n") as file:
-            writer = DictWriter(file, fieldnames=field_names)
-            writer.writerow(cords_dict)
+            bbox_width = x2 - x1
+            bbox_height = y2 - y1
+            x_center = x1 + bbox_width / 2
+            y_center = y1 + bbox_height / 2
+
+            x_center /= img_w
+            y_center /= img_h
+            bbox_width /= img_w
+            bbox_height /= img_h
+
+            label = list(label_dict.keys()).index(color_label_map.get(clr.lower(), "unknown"))
+
+            yolo_file.write(f"{label} {x_center:.6f} {y_center:.6f} {bbox_width:.6f} {bbox_height:.6f}\n")
 
 def mouse_press(event):
     global start_x, start_y
@@ -189,10 +197,13 @@ def submit():
 
         menu = switch['menu']
         menu.delete(0,END)
-        for label in label_list:
-                clr = random_clr()
-                label_dict[label] = clr
-                menu.add_command(label=label,command=lambda c=clr: color_cmd(c))
+        for i,label in enumerate(label_list):
+            clr = random_clr()
+            label_dict[label] = clr
+            menu.add_command(label=label,command=lambda c=clr: color_cmd(c))
+
+            if i <= 9:
+                menu.bind(f"{i+1}",lambda c=clr: color_cmd(c))
         
         var.set(label_list[0])
         color_cmd(label_dict[label_list[0]])
