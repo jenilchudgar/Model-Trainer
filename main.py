@@ -15,10 +15,12 @@ o_path = ""
 current = 0
 
 start_x = start_y = 0
-color = "Red"
+color = ""
 rectangles = []
 rectangles_data = {}
 original_images = []
+label_list = []
+label_dict = {}
 
 def show_image(index):
     global rectangles
@@ -153,9 +155,13 @@ def switch_cmd(e):
 def clear():
     global current
     if images:
-        show_image(current)
+        rectangles.clear()
+        canvas.delete("all")
+        canvas.image = images[current]  
+        canvas.create_image(0, 0, image=canvas.image, anchor=NW)
+        rectangles_data[current] = []
 
-def io_folder_sel(io_selec):
+def selection(io_selec):
     global i_path,o_path,inputLabel,outputLabel,top
 
     path = filedialog.askdirectory()
@@ -169,33 +175,54 @@ def io_folder_sel(io_selec):
         if io_selec == "o": 
             o_path = path
             outputLabel.config(text=msg)
-    
-    try:
-        if i_path and o_path:
-            top.destroy()
-            root.deiconify()
-            root.focus_set()
-            load_images()
-            
-    except: pass
 
+def submit():
+    global i_path, o_path,label_entry,label_dict,switch,var
+
+    label_list = label_entry.get().split(",")
+
+    if i_path and o_path and (label_list is not None):
+        top.destroy()
+        root.deiconify()
+        root.focus_set()
+        load_images()
+
+        menu = switch['menu']
+        menu.delete(0,END)
+        for label in label_list:
+                clr = random_clr()
+                label_dict[label] = clr
+                menu.add_command(label=label,command=lambda c=clr: color_cmd(c))
+        
+        var.set(label_list[0])
+        color_cmd(label_dict[label_list[0]])
+            
 def open_new_window():
-    global inputLabel,outputLabel,top,x,y
+    global inputLabel,outputLabel,top,label_entry
     top = Toplevel(root) 
     top.title("Input Output Folder Choice")
-    top.geometry(f"250x150+550+300")  
+    top.geometry(f"500x200+550+300")  
 
     inputLabel = Label(top,text="Select Input Folder")
     inputLabel.grid(row=1,column=0,pady=(25,10),padx=15)
 
-    inputBtn = Button(top,text="Select",command=lambda: io_folder_sel("i"))
+    inputBtn = Button(top,text="Select",command=lambda: selection("i"))
     inputBtn.grid(row=1,column=1,padx=15)
 
     outputLabel = Label(top,text="Select Output Folder")
     outputLabel.grid(row=2,column=0,pady=10,padx=15)
 
-    outputBtn = Button(top,text="Select",command=lambda: io_folder_sel("o"))
+    outputBtn = Button(top,text="Select",command=lambda: selection("o"))
     outputBtn.grid(row=2,column=1,padx=15)
+
+    label = Label(top,text="Enter Labels (comma seperated)")
+    label.grid(row=3,column=0,pady=10,padx=15)
+
+    label_entry = Entry(top,width=40)
+    label_entry.grid(row=3,column=1,pady=10,padx=15)
+
+    subBtn = Button(top,text="Submit",command=submit)
+    subBtn.grid(row=4,column=0,padx=15,pady=(20,5),columnspan=2)
 
 def load_images(i=1):
     global images, original_images, statusBar, canvas, current, i_path
@@ -223,23 +250,21 @@ def load_images(i=1):
             canvas.bind("<ButtonPress-1>", mouse_press)
             canvas.bind("<B1-Motion>", mouse_drag)
 
-def color_cmd(e=None):
-    global color
-    color = color_var.get()
+def color_cmd(clr):
+    global color,label_dict
+    color = clr
+    
+    for item in label_dict:
+        if label_dict[item] == color:
+            var.set(item)
+            break
 
-def random_clr():
-    global colors,color
+def random_clr(): 
     clr = "#{:06x}".format(random.randint(0, 0xFFFFFF))
-    if clr not in colors:
-        colors.append(clr)
-        menu = color_switch['menu']
-        menu.delete(0,END)
-
-        for c in colors:
-            menu.add_command(label=c, command=lambda c=c: (color_var.set(c), color_cmd()))
-
-        color_var.set(clr)
-        color = color_var.get()
+    if clr not in label_dict.values():
+        return clr     
+    else:   
+        random_clr()
 
 statusBar = Label(root)
 canvas = Canvas(root)
@@ -266,13 +291,9 @@ switch_var = StringVar(value="On")
 switch = OptionMenu(switch_frame,switch_var,*["On","Off"],command=switch_cmd)
 switch.grid(row=0,column=0,pady=5,padx=10)
 
-colors = ["Red","Green","Blue","Yellow","Black"]
-color_var = StringVar(value="Red")
-color_switch = OptionMenu(switch_frame, color_var, *colors, command=color_cmd)
-color_switch.grid(row=0,column=1,pady=5,padx=10)
-
-random_btn = Button(switch_frame,text="Random Color",command=random_clr)
-random_btn.grid(row=0,column=2,pady=5,padx=10)
+var = StringVar()
+switch = OptionMenu(switch_frame, var, command=color_cmd,*["None"])
+switch.grid(row=0,column=1,pady=5,padx=10)
 
 root.bind("<Left>",backward)
 root.bind("<Right>",forward)
