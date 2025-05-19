@@ -56,7 +56,7 @@ class ImageAnnotator:
         
         # Configure style
         self.style = ttk.Style()
-        self.style.configure("TButton", background=self.theme["primary"], foreground="black", font=("Arial", 10))
+        self.style.configure("TButton", background=self.theme["primary"], foreground="black", font=("Arial, 10"))
         self.style.configure("Nav.TButton", foreground="black")  # Configure black text color for all nav buttons
         self.style.configure("TLabel", font=("Arial", 10))
         self.style.configure("TFrame", background=self.theme["light"])
@@ -272,17 +272,21 @@ class ImageAnnotator:
         self.canvas_frame = ttk.Frame(main_frame)
         self.canvas_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
         
-        # Create canvas with scrollbars
+        # Create canvas without vertical scrollbar
         self.canvas = Canvas(self.canvas_frame, bg="#2c3e50", highlightthickness=0)
         self.canvas.pack(fill=BOTH, expand=True)
         
+        # Only horizontal scrollbar (if you want to keep it, otherwise remove both)
         self.h_scrollbar = Scrollbar(self.canvas_frame, orient=HORIZONTAL, command=self.canvas.xview)
         self.h_scrollbar.pack(side=BOTTOM, fill=X)
         
-        self.v_scrollbar = Scrollbar(self.canvas_frame, orient=VERTICAL, command=self.canvas.yview)
-        self.v_scrollbar.pack(side=RIGHT, fill=Y)
+        # Remove or comment out the vertical scrollbar
+        # self.v_scrollbar = Scrollbar(self.canvas_frame, orient=VERTICAL, command=self.canvas.yview)
+        # self.v_scrollbar.pack(side=RIGHT, fill=Y)
         
-        self.canvas.config(xscrollcommand=self.h_scrollbar.set, yscrollcommand=self.v_scrollbar.set)
+        self.canvas.config(xscrollcommand=self.h_scrollbar.set)
+        # Remove yscrollcommand
+        # self.canvas.config(yscrollcommand=self.v_scrollbar.set)
         
         # Bind canvas events
         self.canvas.bind("<Button-1>", self.draw_shape_start)
