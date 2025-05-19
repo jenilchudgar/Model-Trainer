@@ -1,8 +1,7 @@
 from tkinter import *
 from tkinter import filedialog,messagebox
 from PIL import ImageTk,Image
-from csv import DictWriter
-import io,os,random
+import os,random
 
 root = Tk()
 root.title("Image Editor")
